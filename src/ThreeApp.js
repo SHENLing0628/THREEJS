@@ -16,7 +16,7 @@ export default class ThreeApp extends React.Component {
     let container = document.getElementById('scene');
 
     initScene();
-    animate();
+    // animate();
 
     function initScene() {
       //创建场景
@@ -38,8 +38,11 @@ export default class ThreeApp extends React.Component {
 
       //添加物体
       // group.add(createCube(50,50,50, { x: 30, y: 30, z: 30 }));
+      let earth = createSphere(150, 15, 15, { x: 0, y: 0, z: 0 });
+      let ground = createPlane(200, 200, 10, 5, {x: 0, y: -200, z: 0})
       // group.add(createPlane(20, 50, 1, 2,  { x: -30, y: 30, z: 30 }));
-      group.add(createSphere(150, 15, 15, { x: 0, y: 0, z: 0 }))
+      scene.add(ground);
+      group.add(earth)
 
 
       //创建渲染器
@@ -49,6 +52,9 @@ export default class ThreeApp extends React.Component {
       renderer.setSize( window.innerWidth, window.innerHeight);//渲染器大小尺寸
       container.appendChild( renderer.domElement );
 
+      //动画效果
+      requestAnimationFrame(animate);
+      earth.rotation.x += 0.05;
       renderer.render( scene, camera);
     }
 
@@ -63,7 +69,7 @@ export default class ThreeApp extends React.Component {
 
     function createPlane(width, height, widthSegment, heightSegment, position) {
       let planeGeometry = new THREE.PlaneGeometry(width, height, widthSegment, heightSegment);
-      let planeMaterial = new THREE.MeshBasicMaterial({color: 0x00ffff});
+      let planeMaterial = new THREE.MeshStandardMaterial({color: 0xffffff});
       let plane = new THREE.Mesh(planeGeometry, planeMaterial);
       plane.receiveShadow = true;
       plane.position.set(position.x, position.y, position.z);
@@ -73,8 +79,8 @@ export default class ThreeApp extends React.Component {
     function createSphere(radius, widthSegment, heightSegment, position) {
       let sphereGeometry = new THREE.SphereGeometry(radius, widthSegment, heightSegment);
       let texture = new THREE.TextureLoader().load(require('./assets/Earth.png'));
-      let sphereMaterial = new THREE.MeshPhongMaterial({map: texture});
-      // let sphereMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+      let sphereMaterial = new THREE.MeshStandardMaterial({map: texture});
+      // let sphereMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
       let sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
       sphere.castShadow = true;
       sphere.position.set(position.x, position.y, position.z);
@@ -83,7 +89,7 @@ export default class ThreeApp extends React.Component {
     
     function addSpotLight() {
       spotLight = new SpotLight(0xffffff);
-      spotLight.position.set(480,480,480);
+      spotLight.position.set(300,200,300);
       spotLight.castShadow = true;
       // spotLight.shadow.mapSize.width = 2048;
       // spotLight.shadow.mapSize.height = 2048;
@@ -92,7 +98,7 @@ export default class ThreeApp extends React.Component {
     
     function animate () {
       requestAnimationFrame(animate);
-      // group.rotation.x += 0.01;
+      group.rotation.x += 0.005;
       group.rotation.y += 0.005;
       renderer.render( scene, camera);
     }
