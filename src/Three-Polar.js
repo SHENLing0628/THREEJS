@@ -1,7 +1,7 @@
 import React from  'react';
 import * as THREE from 'three';
 import Orbitcontrols from 'three-orbitcontrols';
-import { Sphere } from 'three';
+import TWEEN from '@tweenjs/tween.js';
 
 export default class ThreePolar extends React.Component {
 
@@ -19,6 +19,8 @@ export default class ThreePolar extends React.Component {
     let MercuryTrack, VenusTrack, EarthTrack, MarsTrack, JupiterTrack, SaturnTrack, UranusTrack, NeptuneTrack;
     let MercuryGroup, VenusGroup, EarthGroup, MarsGroup, JupiterGroup, SaturnGroup, UranusGroup, NeptuneGroup;
 
+    let raycaster, mouse, intersects;
+
     initScene();
     // animate();
 
@@ -35,15 +37,15 @@ export default class ThreePolar extends React.Component {
       NeptuneGroup = new THREE.Group();
 
       scene.rotateY(Math.PI * 0.25);
-      scene.rotateX(-Math.PI * 0.1)
+      // scene.rotateX(-Math.PI * 0.1)
 
       let sceneTexture = new THREE.TextureLoader().load(require('./assets/background.jpg'));
       scene.background = sceneTexture;
       
       //创建相机
-      camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 2000);
-      camera.position.set(380, 380, 380)
-      camera.lookAt(new THREE.Vector3(0, 0, 0))
+      camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 2000);
+      camera.position.set(380,380,380);
+      camera.lookAt(new THREE.Vector3(0,0,0));
       
       //添加鼠标控制效果
       let orbitControls = new Orbitcontrols(camera);
@@ -53,8 +55,8 @@ export default class ThreePolar extends React.Component {
       addSpotLight();
 
       //添加辅助坐标轴
-      // let axes = new THREE.AxisHelper(300);
-      // scene.add(axes);
+      let axes = new THREE.AxisHelper(300);
+      scene.add(axes);
 
       //添加物体
 
@@ -69,42 +71,42 @@ export default class ThreePolar extends React.Component {
 
       Sun = addSun(50, {x: 0, y: 0, z: 0});
 
-      Mercury = addPlanet(10, {x: 70, y: 0, z: 0}, mercuryTexture);
+      Mercury = addPlanet(10, {x: 70, y: 0, z: 0}, mercuryTexture, 'Mercury');
       MercuryTrack = addTrack(70, {x: 0, y: 0, z: 0});
       MercuryGroup.add(Mercury);
       MercuryGroup.add(MercuryTrack);
 
-      Venus = addPlanet(15, {x: 110, y: 0, z: 0}, venusTexture);
+      Venus = addPlanet(15, {x: 110, y: 0, z: 0}, venusTexture, 'Venus');
       VenusTrack = addTrack(110, {x: 0, y: 0, z: 0});
       VenusGroup.add(Venus);
       VenusGroup.add(VenusTrack);
 
-      Earth = addPlanet(17, {x: 160, y: 0, z: 0}, earthTexture);
+      Earth = addPlanet(17, {x: 160, y: 0, z: 0}, earthTexture, 'Earth');
       EarthTrack = addTrack(160, {x: 0, y: 0, z: 0});
       EarthGroup.add(Earth);
       EarthGroup.add(EarthTrack);
 
-      Mars = addPlanet(14, {x: 200, y: 0, z: 0}, marsTexture);
+      Mars = addPlanet(14, {x: 200, y: 0, z: 0}, marsTexture, 'Mars');
       MarsTrack = addTrack(200, {x: 0, y: 0, z: 0});
       MarsGroup.add(Mars);
       MarsGroup.add(MarsTrack);
 
-      Jupiter = addPlanet(25, {x: 250, y: 0, z: 0}, jupiterTexture);
+      Jupiter = addPlanet(25, {x: 250, y: 0, z: 0}, jupiterTexture, 'Jupiter');
       JupiterTrack = addTrack(250, {x: 0, y: 0, z: 0});
       JupiterGroup.add(Jupiter);
       JupiterGroup.add(JupiterTrack);
 
-      Saturn = addPlanet(25, {x: 320, y: 0, z: 0}, saturnTexture);
+      Saturn = addPlanet(25, {x: 320, y: 0, z: 0}, saturnTexture, 'Saturn');
       SaturnTrack = addTrack(320, {x: 0, y: 0, z: 0});
       SaturnGroup.add(Saturn);
       SaturnGroup.add(SaturnTrack);
       
-      Uranus = addPlanet(17, {x: 380, y: 0, z: 0}, uranusTexture);
+      Uranus = addPlanet(17, {x: 380, y: 0, z: 0}, uranusTexture, 'Uranus');
       UranusTrack = addTrack(380, {x: 0, y: 0, z: 0});
       UranusGroup.add(Uranus);
       UranusGroup.add(UranusTrack);
 
-      Neptune = addPlanet(17, {x: 430, y: 0, z: 0}, neptuneTexture);
+      Neptune = addPlanet(17, {x: 430, y: 0, z: 0}, neptuneTexture, 'Neptune');
       NeptuneTrack = addTrack(430, {x: 0, y: 0, z: 0});
       NeptuneGroup.add(Neptune);
       NeptuneGroup.add(NeptuneTrack);
@@ -118,7 +120,6 @@ export default class ThreePolar extends React.Component {
       scene.add(SaturnGroup);
       scene.add(UranusGroup);
       scene.add(NeptuneGroup);
-      
 
       //创建渲染器
       renderer = new THREE.WebGLRenderer();
@@ -127,10 +128,37 @@ export default class ThreePolar extends React.Component {
       container.appendChild( renderer.domElement );
 
       //动画效果
-      requestAnimationFrame(draw);
+      requestAnimationFrame(animate);
+
+      //创建光线投射器
+      raycaster = new THREE.Raycaster();
+      //定义鼠标向量
+      mouse = new THREE.Vector2();
+      //点击动作
+      document.addEventListener('click', function(event){
+        event.preventDefault();
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        renderRaycasterObj(raycaster, scene, camera, mouse);
+      },false);
     }
 
-    function draw() {
+    function renderRaycasterObj(raycaster, scene, camera, mouse) {
+      raycaster.setFromCamera(mouse, camera);
+      intersects = raycaster.intersectObjects([Sun, Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune]);
+      if(intersects.length > 0) {
+        switch (intersects[0].object.name) {
+          case 'Sun': camera.position.set(50, 50, 50); camera.lookAt(new THREE.Vector3(50, 50, 0)); break;
+          default: break;
+        }
+      }
+      else {
+        camera.position.set(380,380,380);
+        camera.lookAt(new THREE.Vector3(0,0,0));
+      }
+    }
+
+    function animate() {
       //自传
       Sun.rotation.y += Math.PI / 2 * 0.001;
       Mercury.rotation.y += Math.PI / 2 * 0.0008;
@@ -151,15 +179,10 @@ export default class ThreePolar extends React.Component {
       SaturnGroup.rotation.y += Math.PI / 2 * 0.0003;
       UranusGroup.rotation.y += Math.PI / 2 * 0.00066;
       NeptuneGroup.rotation.y += Math.PI / 2 * 0.0015;
-
-      // //地球自转
-      // Earth.rotation.y -= 0.002;
-
-      // //月亮绕地球转动
-      // MoonGroup.rotation.y += Math.PI / 2 * 0.001;
-
+      
+      TWEEN.update();
+      requestAnimationFrame(animate);
       renderer.render(scene, camera);
-      requestAnimationFrame(draw);
     }
 
     function addSun(radius, position) {
@@ -167,14 +190,16 @@ export default class ThreePolar extends React.Component {
       let sunTexture = new THREE.TextureLoader().load(require('./assets/sun.jpg'));
       let sunMaterial = new THREE.MeshPhongMaterial({ map: sunTexture});
       let sun = new THREE.Mesh(sunGeometry, sunMaterial);
+      sun.name = 'Sun';
       sun.position.set(position.x, position.y, position.z);
       return sun;
     }
 
-    function addPlanet(radius, position, texture) {
+    function addPlanet(radius, position, texture, name) {
       let planetGeometry = new THREE.SphereGeometry(radius, 50, 50);
       let planetMaterial = new THREE.MeshPhongMaterial({ map: texture});
       let planet = new THREE.Mesh(planetGeometry, planetMaterial);
+      planet.name = name;
       planet.castShadow = true;
       planet.position.set(position.x, position.y, position.z);
       return planet;
