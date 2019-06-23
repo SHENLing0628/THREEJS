@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import Orbitcontrols from 'three-orbitcontrols';
 import TWEEN from '@tweenjs/tween.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
+import { Color } from 'three';
 // import { CSS3DRenderer, CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer'
 
 export default class ThreePolar extends React.Component {
@@ -39,8 +40,9 @@ export default class ThreePolar extends React.Component {
       scene.rotateY(Math.PI * 0.25);
       // scene.rotateX(-Math.PI * 0.1)
 
-      let sceneTexture = new THREE.TextureLoader().load(require('./assets/background.jpg'));
-      scene.background = sceneTexture;
+      // let sceneTexture = new THREE.TextureLoader().load(require('./assets/background.jpg'));
+      // scene.background = sceneTexture;
+      starsBackground();
       
       //创建相机
       camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 2000);
@@ -130,6 +132,7 @@ export default class ThreePolar extends React.Component {
       scene.add(SaturnGroup);
       scene.add(UranusGroup);
       scene.add(NeptuneGroup);
+
 
       //创建渲染器
       renderer = new THREE.WebGLRenderer();
@@ -268,10 +271,76 @@ export default class ThreePolar extends React.Component {
     }
     
     function addSpotLight() {
-      spotLight = new THREE.AmbientLight (0xffffff)
-      spotLight.position.set(800,1000,1000);
-      spotLight.castShadow = true;
-      scene.add(spotLight)
+      let sunLight = new THREE.PointLight(0xddddaa,1.5,500);
+      scene.add(sunLight);
+      let ambient = new THREE.AmbientLight(0xfc7f4f4);
+      scene.add(ambient);
+    }
+
+    function starsBackground() {
+      const particles = 20000; //星星数量
+      const bufferGeometry = new THREE.BufferGeometry();
+
+      let positions = new Float32Array(particles * 3);
+      let colors = new Float32Array(particles * 3);
+
+      let color = new THREE.Color();
+
+      const gap = 1000;
+
+      for ( let i = 0; i < positions.length; i += 3 ) {
+        // positions
+      
+        /*-2gap < x < 2gap */
+        let x = ( Math.random() * gap *2 )* (Math.random()<.5? -1 : 1);
+        let y = ( Math.random() * gap *2 )* (Math.random()<.5? -1 : 1);
+        let z = ( Math.random() * gap *2 )* (Math.random()<.5? -1 : 1);
+      
+        /*找出x,y,z中绝对值最大的一个数*/
+        let biggest = Math.abs(x) > Math.abs(y) ? Math.abs(x) > Math.abs(z) ?　'x' : 'z' :
+          Math.abs(y) > Math.abs(z) ? 'y' : 'z';
+      
+        let pos = { x, y, z};
+      
+        /*如果最大值比n要小（因为要在一个距离之外才出现星星）则赋值为n（-n）*/
+        if(Math.abs(pos[biggest]) < gap) pos[biggest] = pos[biggest] < 0 ? -gap : gap;
+      
+        x = pos['x'];
+        y = pos['y'];
+        z = pos['z'];
+      
+        positions[ i ]     = x;
+        positions[ i + 1 ] = y;
+        positions[ i + 2 ] = z;
+      
+        // colors
+        /*70%星星有颜色*/
+        let hasColor = Math.random() > 0.3;
+        let vx, vy, vz;
+
+        if(hasColor){
+            vx = 0 ;
+            vy = 0 ;
+            vz = 0 ;
+        }else{
+            vx = 1 ;
+            vy = 1 ;
+            vz = 1 ;
+        }
+        color.setRGB( vx, vy, vz );
+        colors[ i ]     = color.r;
+        colors[ i + 1 ] = color.g;
+        colors[ i + 2 ] = color.b;
+      }
+      bufferGeometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
+      bufferGeometry.addAttribute( 'color', new THREE.BufferAttribute( colors, 3 ) );
+      bufferGeometry.computeBoundingSphere();
+
+      /*星星的material*/
+      let material = new THREE.PointsMaterial( { size: 6, vertexColors: THREE.VertexColors } );
+      let particleSystem = new THREE.Points( bufferGeometry, material );
+      scene.add( particleSystem );
+
     }
   }
 
