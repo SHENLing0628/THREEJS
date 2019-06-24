@@ -2,8 +2,7 @@ import React from  'react';
 import * as THREE from 'three';
 import './three.scss';
 import Orbitcontrols from 'three-orbitcontrols';
-import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
-import { CSS3DRenderer, CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer'
+import TWEEN from '@tweenjs/tween.js';
 
 export default class ThreeApp extends React.Component {
 
@@ -12,10 +11,10 @@ export default class ThreeApp extends React.Component {
   }
 
   initThree = () => {
-    let camera, scene, renderer, group, spotLight, labelRenderer, label3Renderer;
+    let camera, scene, renderer, group, orbitControls;
     let container = document.getElementById('scene');
-    let ball;
-    let v, a;
+
+    let cloud, vertices;
 
     initScene();
     // animate();
@@ -32,128 +31,86 @@ export default class ThreeApp extends React.Component {
       camera.position.set(100, 30, 100)
       
       //添加鼠标控制效果
-      let orbitControls = new Orbitcontrols(camera);
+      orbitControls = new Orbitcontrols(camera);
       orbitControls.autoRotate = true;
+
+      //添加辅助坐标轴
+      let axes = new THREE.AxisHelper(300);
+      scene.add(axes);
 
       //添加光源
       addSpotLight();
+      
+      // createParticles();
+      cloud = createParticles(2, true, 0.9, 0xffffff, false, 0xffffff);
+      vertices = cloud.geometry.vertices;
+      scene.add(cloud);
 
-      //添加物体
-      let ground = createCube(110,1,110, { x: 0, y: -25, z: 0 });
-      let ground1 = createPlane(110, 100, 1, 1, {x: 0, y: -25, z: 0});
-      ball = createSphere(5, 50, 50, {x: 30, y: 15, z: 30});
-      scene.add(ball);
-      ground1.rotateX( -Math.PI * 0.5);
-      scene.add(ground1);
+      console.log(vertices);
 
-      let text = createText();
-      ball.add(text);
-
-      let text2 = create3DText();
-      ball.add(text2);
-
-      // 2d渲染器
-      labelRenderer = new CSS2DRenderer();
-      labelRenderer.setSize(window.innerWidth, window.innerHeight)
-      labelRenderer.domElement.style.position = 'absolute'
-      labelRenderer.domElement.style.top = 20 + 'px'
-      container.appendChild(labelRenderer.domElement)
-
-      //3d渲染器
-      label3Renderer = new CSS3DRenderer();
-      label3Renderer.setSize(window.innerWidth, window.innerHeight)
-      label3Renderer.domElement.style.position = 'absolute'
-      label3Renderer.domElement.style.top = 20 + 'px'
-      container.appendChild(label3Renderer.domElement)
-
-      v = 0;
-      a = -0.1;
-
-      //创建渲染器
+      //渲染器
       renderer = new THREE.WebGLRenderer();
-			renderer.setPixelRatio(window.devicePixelRatio); // 设置像素比，针对高清屏
+      renderer.setPixelRatio(window.devicePixelRatio); // 设置像素比，针对高清屏
       renderer.setSize( window.innerWidth, window.innerHeight);//渲染器大小尺寸
       container.appendChild( renderer.domElement );
+      animate();
 
-      //label renderer
-
-
-      //动画效果
-      requestAnimationFrame(draw);
     }
 
-    function draw() {
-      ball.position.y += v;
-      v += a;
+    function renderFunc() {
+      //产生雨滴动画效果
+      var vertices = cloud.geometry.vertices;
+      vertices.forEach(function (v) {
 
-      if (ball.position.y <= -20) {
-        v = -v * 0.9;
-      }
+          v.y = v.y - (v.velocityY);
+          v.x = v.x - (v.velocityX)*.5;
 
-      if (Math.abs(v) < 0.0005) {
-        ball.position.y = -20;
-      }
-      labelRenderer.render(scene, camera)
-      label3Renderer.render(scene, camera)
+          if (v.y <= -60) v.y = 60;
+          if (v.x <= -20 || v.x >= 20) v.velocityX = v.velocityX * -1;
+      });
+
+      //设置实时更新网格的顶点信息
+      cloud.geometry.verticesNeedUpdate = true;
       renderer.render(scene, camera);
-      requestAnimationFrame(draw);
     }
 
-    function createText() {
-      let labelDiv = document.createElement('div');
-      labelDiv.className = 'label';
-      labelDiv.textContent = 'test';
-      labelDiv.style.marginTop = '-1em';
-      let modelLabel = new CSS2DObject(labelDiv);
-      modelLabel.position.set(30,15,30);
-      return modelLabel;
+    function particleAnimate(vertice) {
+      let tween = new TWEEN.Tween({
+        
+      })
     }
 
-    function create3DText() {
-      let labelDiv = document.createElement('div');
-      labelDiv.className = 'label';
-      labelDiv.textContent = 'test2';
-      labelDiv.style.marginTop = '-1em';
-      let object = new CSS3DObject(labelDiv);
-      object.position.set(50,15,50);
-      return object;
+    function animate() {
+      // orbitControls.update();
+      renderFunc();
+      requestAnimationFrame(animate);
     }
 
-    function createCube(x, y, z, position) {
-      let geometry = new THREE.BoxGeometry(x, y, z); //create BoxGeometry object
-      let material = new THREE.MeshStandardMaterial({ color: 0xffffff}); //set the material of the cube
-      let cube = new THREE.Mesh( geometry, material); //Mesh contains the cube and the material, we can push the mesh object into our scenerio, and make it moves freely in the scene
-      cube.receiveShadow = true;
-      cube.position.set(position.x, position.y, position.z)
-      return cube;
+    function createParticles(size, transparent, opacity, vertexColors, sizeAttenuation, color) {
+      let geometry = new THREE.Geometry();
+      let material = new THREE.PointCloudMaterial({ size: size, transparent: transparent, opacity: opacity, vertexColors: vertexColors, sizeAttenuation: sizeAttenuation, color: color });
+      let range = 500;
+      for (let i = 0; i < 500; i++) {
+        //创建随机粒子并添加到geometry中
+        let particle = new THREE.Vector3(Math.random() *range - range / 2, Math.random() * range - range / 2, Math.random() * range - range / 2);
+        particle.velocityX = 0.1 + Math.random() / 5;
+        particle.velocityY = (Math.random() - 0.5) / 3;
+        geometry.vertices.push(particle);
+
+        //创建颜色数组geometry.colors
+        let color = new THREE.Color(0xffffff);
+        // color.setHSL(color.getHSL().h, color.getHSL().s, Math.random() * color.getHSL().l);
+        geometry.colors.push(color);
+      }
+
+      return (new THREE.PointCloud(geometry, material));
     }
 
-    function createPlane(width, height, widthSegment, heightSegment, position) {
-      let planeGeometry = new THREE.PlaneGeometry(width, height, widthSegment, heightSegment);
-      let planeMaterial = new THREE.MeshStandardMaterial({color: 0xffffff});
-      let plane = new THREE.Mesh(planeGeometry, planeMaterial);
-      plane.receiveShadow = true;
-      plane.position.set(position.x, position.y, position.z);
-      return plane;
-    }
-
-    function createSphere(radius, widthSegment, heightSegment, position) {
-      let sphereGeometry = new THREE.SphereGeometry(radius, widthSegment, heightSegment);
-      let texture = new THREE.TextureLoader().load(require('./assets/Earth.png'));
-      // let sphereMaterial = new THREE.MeshStandardMaterial({map: texture});
-      let sphereMaterial = new THREE.MeshPhongMaterial({ color: 0xffff00, side: THREE.DoubleSide });
-      let sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-      sphere.castShadow = true;
-      sphere.position.set(position.x, position.y, position.z);
-      return sphere;
-    }
-    
     function addSpotLight() {
-      spotLight = new THREE.SpotLight(0xffffff)
-      
-      spotLight.position.set(400,400,200);
-      spotLight.castShadow = true;
-      scene.add(spotLight)
+      let sunLight = new THREE.PointLight(0xddddaa,1.5,500);
+      scene.add(sunLight);
+      let ambient = new THREE.AmbientLight(0xfc7f4f4);
+      scene.add(ambient);
     }
   }
 
