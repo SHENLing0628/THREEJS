@@ -61,12 +61,12 @@ export default class ThreeApp extends React.Component {
       //产生雨滴动画效果
       var vertices = cloud.geometry.vertices;
       vertices.forEach(function (v) {
+        particleAnimate(v);
+          // v.y = v.y - (v.velocityY);
+          // v.x = v.x - (v.velocityX)*.5;
 
-          v.y = v.y - (v.velocityY);
-          v.x = v.x - (v.velocityX)*.5;
-
-          if (v.y <= -60) v.y = 60;
-          if (v.x <= -20 || v.x >= 20) v.velocityX = v.velocityX * -1;
+          // if (v.y <= -60) v.y = 60;
+          // if (v.x <= -20 || v.x >= 20) v.velocityX = v.velocityX * -1;
       });
 
       //设置实时更新网格的顶点信息
@@ -76,12 +76,26 @@ export default class ThreeApp extends React.Component {
 
     function particleAnimate(vertice) {
       let tween = new TWEEN.Tween({
-        
-      })
+        x: vertice.x,
+        y: vertice.y,
+        z: vertice.z
+      });
+      tween.to({
+        x: 0,
+        y: 0,
+        z: 0
+      }, 1000);
+      tween.onUpdate( object => {
+        vertice.y = object.y;
+        vertice.x = object.x;
+        vertice.z = object.z;
+      });
+      tween.start();
     }
 
     function animate() {
       // orbitControls.update();
+      TWEEN.update();
       renderFunc();
       requestAnimationFrame(animate);
     }
