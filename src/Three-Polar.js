@@ -143,7 +143,7 @@ export default class ThreePolar extends React.Component {
       labelRenderer = new CSS2DRenderer();
       labelRenderer.setSize(window.innerWidth, window.innerHeight)
       labelRenderer.domElement.style.position = 'absolute'
-      labelRenderer.domElement.style.top = 20 + 'px'
+      labelRenderer.domElement.style.top = 10 + 'px'
       container.appendChild(labelRenderer.domElement)
 
       //创建光线投射器
@@ -166,6 +166,7 @@ export default class ThreePolar extends React.Component {
     function renderRaycasterObj(raycaster, scene, camera, mouse) {
       raycaster.setFromCamera(mouse, camera);
       intersects = raycaster.intersectObjects([Sun, Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune]);
+      console.log(intersects);
       if(intersects.length > 0) {
         switch (intersects[0].object.name) {
           // case 'Sun': camera.position.set(50, 50, 50); camera.lookAt(new THREE.Vector3(50, 50, 0)); orbitControls.target = new THREE.Vector3(50, 50, 50);break;
