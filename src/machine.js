@@ -23,9 +23,15 @@ export default class Machine extends React.Component {
     rings,
     specialGroup2,
     normalTorus2,
-    scatterRing;
+    scatterRing,
+    specialGroup3,
+    specialGroup4,
+    torusWithNail,
+    core,
+    rightTorus,
+    tailPart;
 
-    let originalZ = 500;
+    let originalZ = 2000;
 
     initScene();
     // animate();
@@ -36,8 +42,8 @@ export default class Machine extends React.Component {
       // scene.rotateY(Math.PI / 4)
       
       //创建相机
-      camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 3000);
-      camera.position.set(1000, 1000, 1000)
+      camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 5000);
+      camera.position.set(2000, 2000, 2000)
       camera.lookAt(new THREE.Vector3(0, 0, 0))
       
       //添加鼠标控制效果
@@ -67,11 +73,15 @@ export default class Machine extends React.Component {
 
       //2.红蓝小圈组合
       redBlueSmallGroup = new THREE.Group();
-      let redBlueSmallGroupPoints = getPoint(70, 0, 0, 80);
-      redBlueSmallGroupPoints.forEach(item => {
-        redBlueSmallGroup.add(createCube(2, 2, 3, 0.3, item.x, item.y, originalZ, 0xCC0001))
-        redBlueSmallGroup.add(createCube(2, 2, 3, 0.3, item.x, item.y, originalZ - 10, 0x4AFFFE))
+      getPoint(70, 0, 0, 100).forEach(item => {
+        redBlueSmallGroup.add(createCube(2, 2, 3, 0.5, item.x, item.y, originalZ, 0xCC0001))
+        redBlueSmallGroup.add(createCube(2, 2, 3, 0.5, item.x, item.y, originalZ - 10, 0x4AFFFE))
+        redBlueSmallGroup.add(createCube(2, 2, 3, 0.5, item.x, item.y, originalZ - 150, 0x4AFFFE))
+        redBlueSmallGroup.add(createCube(2, 2, 3, 0.5, item.x, item.y, originalZ - 160, 0xCC0001))
+        redBlueSmallGroup.add(createCube(2, 2, 3, 0.5, item.x, item.y, originalZ - 180, 0x4AFFFE))
+        redBlueSmallGroup.add(createCube(2, 2, 3, 0.5, item.x, item.y, originalZ - 190, 0xCC0001))
       })
+      scene.add(redBlueSmallGroup);
 
       //3. 红色点阵圈
       redCircle = new THREE.Group();
@@ -83,15 +93,7 @@ export default class Machine extends React.Component {
       //4. 圆环
       normalTorus = createNormalTorus(150, 3, 0.7, 0, 0, originalZ - 100, 0x4AFFFE);
       scene.add(normalTorus)
-
-      //5.红蓝小圈组合
-      redBlueSmallGroupPoints.forEach(item => {
-        redBlueSmallGroup.add(createCube(2, 2, 3, 0.3, item.x, item.y, originalZ - 150, 0x4AFFFE))
-        redBlueSmallGroup.add(createCube(2, 2, 3, 0.3, item.x, item.y, originalZ - 160, 0xCC0001))
-        redBlueSmallGroup.add(createCube(2, 2, 3, 0.3, item.x, item.y, originalZ - 180, 0x4AFFFE))
-        redBlueSmallGroup.add(createCube(2, 2, 3, 0.3, item.x, item.y, originalZ - 190, 0xCC0001))
-      })
-      scene.add(redBlueSmallGroup);
+      
 
       //6. 半透明圆圈组合（红、蓝、红、蓝）
       transparentCircleGroup = new THREE.Group();
@@ -125,7 +127,6 @@ export default class Machine extends React.Component {
       })
       specialGroup1.add(createNormalTorus(220, 3, 0.5, 0, 0, originalZ - 380, 0x4AFFFE))
       specialGroup1.add(createNormalTorus(260, 3, 0.5, 0, 0, originalZ - 380, 0x4AFFFE))
-
       getPoint(240, 0, 0, 3).forEach(item => {
         specialGroup1.add(createCube(80, 100, 20, 0.9, item.x, item.y, originalZ - 380, 0x4AFFFE))
       })
@@ -169,15 +170,174 @@ export default class Machine extends React.Component {
       scene.add(specialGroup2)
 
       //12. 圆环2
-      normalTorus2 = createNormalTorus(250, 50, 0.9, 0, 0, originalZ - 1000, 0x4AFFFE);
+      normalTorus2 = createNormalTorus(250, 50, 0.9, 0, 0, originalZ - 1050, 0x4AFFFE);
       scene.add(normalTorus2)
 
       //13.散点圆
       scatterRing = new THREE.Group();
-      getPoint(550, 0, 0, 40).forEach(item => {
-        scatterRing.add(createCube(20, 10, 25, 0.5, item.x, item.y, originalZ - 750, 0x4AFFFE))
+      getPoint(600, 0, 0, 40).forEach(item => {
+        scatterRing.add(createCube(5, 25, 2, 0.5, item.x, item.y, originalZ - 730, 0x4AFFFE))
+      })
+      getPoint(550, 0, 0, 200).forEach(item => {
+        scatterRing.add(createCube(5, 12, 2, 0.5, item.x, item.y, originalZ - 760, 0x4AFFFE))
+      })
+      getPoint(450, 0, 0, 200).forEach(item => {
+        scatterRing.add(createCube(5, 5, 2, 0.3, item.x, item.y, originalZ - 760, 0x4AFFFE))
+      })
+      getPoint(470, 0, 0, 200).forEach(item => {
+        scatterRing.add(createCube(5, 5, 2, 0.3, item.x, item.y, originalZ - 760, 0xCC0001))
+      })
+      getPoint(490, 0, 0, 200).forEach(item => {
+        scatterRing.add(createCube(5, 5, 2, 0.3, item.x, item.y, originalZ - 760, 0x4AFFFE))
+      })
+      getPoint(500, 0, 0, 200).forEach(item => {
+        scatterRing.add(createCube(5, 15, 2, 0.3, item.x, item.y, originalZ - 850, 0xFF5500))
+      })
+      getPoint(500, 0, 0, 50).forEach(item => {
+        scatterRing.add(createCube(10, 5, 25, 0.8, item.x, item.y, originalZ - 930, 0x4AFFFE))
+      })
+      getPoint(450, 0, 0, 130).forEach(item => {
+        scatterRing.add(createCube(5, 15, 2, 0.5, item.x, item.y, originalZ - 1200, 0x4AFFFE))
       })
       scene.add(scatterRing)
+
+      //14. 内部长条立方体圆环
+      specialGroup3 = new THREE.Group();
+      getPoint(100, 0, 0, 10).forEach(item => {
+        specialGroup3.add(createCube(10, 10, 450, 0.6, item.x, item.y, originalZ - 700, 0x4AFFFE))
+      })
+      scene.add(specialGroup3);
+
+      //15. 特殊水管管道模型
+      specialGroup4 = createCylinder(250, 120, 0.5, 0, 0, originalZ - 1300, 0x4AFFFE)
+      scene.add(specialGroup4)
+
+      //16.圆环与钉子
+      torusWithNail = new THREE.Group();
+      let nailPart = new THREE.Group();
+      getPoint(170, 0, 0, 3).forEach(item => {
+        nailPart.add(createNormalCylinder(10, 40, 0.6, item.x, item.y, originalZ - 1490, 0x4AFFFE ))
+        nailPart.add(createNormalCylinder(20, 10, 0.6, item.x, item.y, originalZ - 1470, 0x4AFFFE ))
+      })
+      let torusPart = createNormalTorus(150, 5, 0.6, 0, 0, originalZ - 1500, 0x4AFFFE)
+      torusWithNail.add(torusPart)
+      torusWithNail.add(nailPart)
+      scene.add(torusWithNail)
+
+      //17. 核心部分
+      ////左侧黄色部分
+      core = new THREE.Group();
+      getPoint(130, 0, 0, 10).forEach(item => {
+        core.add(createNormalCylinder(2, 400, 0.8, item.x, item.y, originalZ - 1750, 0xF3D225 ))
+      })
+      getPoint(106, 0, 0, 10).forEach(item => {
+        core.add(createCube(4, 50, 4, 0.6, item.x, item.y, originalZ - 1550, 0xF3D225))
+        core.add(createCube(4, 50, 4, 0.6, item.x, item.y, originalZ - 1950, 0xF3D225))
+      })
+      getPoint(150, 0, 0, 10).forEach(item => {
+        core.add(createNormalCylinder(2, 200, 0.8, item.x, item.y, originalZ - 1650, 0x4AFFFE ))
+      })
+      getPoint(160, 0, 0, 50).forEach(item => {
+        core.add(createCube(5, 5, 10, 0.5, item.x, item.y, originalZ - 1600, 0x4AFFFE))
+      })
+      getPoint(200, 0, 0, 100).forEach(item => {
+        core.add(createCube(3, 3, 3, 0.4, item.x, item.y, originalZ - 1550, 0xCC0001))
+      })
+      getPoint(280, 0, 0, 100).forEach(item => {
+        core.add(createCube(3, 3, 3, 0.4, item.x, item.y, originalZ - 1580, 0x4AFFFE))
+      })
+
+      ////核心球体放置于-2050处
+      core.add(createBall(50, 0.9, 0, 0, originalZ - 2050, 0xF3D225))
+
+      core.add(createNormalTorus(200, 2, 0.5, 0, 0, originalZ - 2050, 0xF3D225))
+      core.add(createNormalTorus(190, 2, 0.5, 0, 0, originalZ - 2050, 0xF3D225))
+      getPoint(350, 0, 0, 200).forEach(item => {
+        core.add(createCube(2, 5, 2, 0.7, item.x, item.y, originalZ - 2050, 0xCC0001))
+      })
+      getPoint(450, 0, 0, 450).forEach(item => {
+        core.add(createCube(2, 2, 2, 0.7, item.x, item.y, originalZ - 2050, 0x4AFFFE))
+      })
+      getPoint(470, 0, 0, 100).forEach(item => {
+        core.add(createCube(2, 10, 2, 0.7, item.x, item.y, originalZ - 2050, 0x4AFFFE))
+      })
+      getPoint(480, 0, 0, 100).forEach(item => {
+        core.add(createCube(3, 3, 2, 0.7, item.x, item.y, originalZ - 2050, 0xCC0001))
+      })
+      
+      ////右侧黄色部分
+      getPoint(130, 0, 0, 10).forEach(item => {
+        core.add(createNormalCylinder(2, 400, 0.8, item.x, item.y, originalZ - 2350, 0xF3D225 ))
+      })
+      getPoint(106, 0, 0, 10).forEach(item => {
+        core.add(createCube(4, 50, 4, 0.6, item.x, item.y, originalZ - 2150, 0xF3D225))
+        core.add(createCube(4, 50, 4, 0.6, item.x, item.y, originalZ - 2550, 0xF3D225))
+      })
+      getPoint(150, 0, 0, 10).forEach(item => {
+        core.add(createNormalCylinder(2, 200, 0.8, item.x, item.y, originalZ - 2450, 0x4AFFFE ))
+      })
+      getPoint(230, 0, 0, 100).forEach(item => {
+        core.add(createCube(3, 3, 3, 0.6, item.x, item.y, originalZ - 2350, 0x4AFFFE))
+        core.add(createCube(3, 3, 3, 0.6, item.x, item.y, originalZ - 2380, 0xCC0001))
+        core.add(createCube(3, 3, 3, 0.6, item.x, item.y, originalZ - 2520, 0x4AFFFE))
+        core.add(createCube(3, 3, 3, 0.6, item.x, item.y, originalZ - 2550, 0xCC0001))
+      })
+      getPoint(350, 0, 0, 100).forEach(item => {
+        core.add(createCube(3, 3, 3, 0.6, item.x, item.y, originalZ - 2450, 0xCC0001))
+      })
+      scene.add(core);
+
+      //18. 右侧部分圆管组合
+      rightTorus = new THREE.Group();
+      rightTorus.add(createNormalTorus(250, 8, 0.7, 0, 0, originalZ - 2550, 0x4AFFFE))
+      rightTorus.add(createNormalTorus(250, 8, 0.7, 0, 0, originalZ - 2600, 0x4AFFFE))
+      rightTorus.add(createNormalTorus(150, 8, 0.7, 0, 0, originalZ - 2650, 0x4AFFFE))
+      rightTorus.add(createNormalTorus(350, 8, 0.7, 0, 0, originalZ - 2800, 0x4AFFFE))
+      getPoint(350, 0, 0, 80).forEach(item => {
+        rightTorus.add(createCube(3, 3, 20, 0.6, item.x, item.y, originalZ - 2780, 0x4AFFFE))
+      })
+      rightTorus.add(createNormalTorus(150, 20, 0.7, 0, 0, originalZ - 2850, 0x4AFFFE))
+      rightTorus.add(createNormalTorus(150, 20, 0.7, 0, 0, originalZ - 2870, 0x4AFFFE))
+      rightTorus.add(createNormalTorus(150, 20, 0.7, 0, 0, originalZ - 2890, 0x4AFFFE))
+      rightTorus.add(createNormalTorus(150, 20, 0.7, 0, 0, originalZ - 2910, 0x4AFFFE))
+      rightTorus.add(createNormalTorus(150, 20, 0.7, 0, 0, originalZ - 2930, 0x4AFFFE))
+
+      rightTorus.add(createNormalTorus(350, 10, 0.7, 0, 0, originalZ - 3050, 0x4AFFFE))
+      getPoint(350, 0, 0, 5).forEach(item => {
+        rightTorus.add(createCube(20, 20, 80, 0.6, item.x, item.y, originalZ - 3000, 0x4AFFFE))
+      })
+
+      rightTorus.add(createNormalCylinder(100, 30, 0.9, 0, 0, originalZ - 3200, 0x4AFFFE ))
+      getPoint(150, 0, 0, 10).forEach(item => {
+        rightTorus.add(createCube(30, 30, 150, 0.7, item.x, item.y, originalZ - 3200, 0x4AFFFE))
+      })
+
+      scene.add(rightTorus)
+
+      //收尾带动画部分
+      tailPart = new THREE.Group();
+      getPoint(250, 0, 0, 10).forEach(item => {
+        tailPart.add(createCube(20, 20, 200, 0.4, item.x, item.y, originalZ - 3300, 0x4AFFFE))
+      })
+      getPoint(400, 0, 0, 10).forEach(item => {
+        tailPart.add(createCube(40, 40, 600, 0.8, item.x, item.y, originalZ - 3600, 0x4AFFFE))
+      })
+      getPoint(330, 0, 0, 10).forEach(item => {
+        tailPart.add(createCube(40, 150, 40, 0.8, item.x, item.y, originalZ - 3880, 0x4AFFFE))
+      })
+      getPoint(200, 0, 0, 100).forEach(item => {
+        tailPart.add(createCube(5, 5, 5, 0.6, item.x, item.y, originalZ - 3600, 0x4AFFFE))
+      })
+      getPoint(500, 0, 0, 100).forEach(item => {
+        tailPart.add(createCube(10, 10, 5, 0.4, item.x, item.y, originalZ - 3050, 0xCC0001))
+      })
+      getPoint(550, 0, 0, 100).forEach(item => {
+        tailPart.add(createCube(10, 10, 5, 0.4, item.x, item.y, originalZ - 3050, 0x4AFFFE))
+      })
+      getPoint(400, 0, 0, 100).forEach(item => {
+        tailPart.add(createCube(5, 30, 5, 0.4, item.x, item.y, originalZ - 2730, 0xFF5500))
+      })
+      scene.add(tailPart)
 
       //创建渲染器
       renderer = new THREE.WebGLRenderer();
@@ -214,40 +374,31 @@ export default class Machine extends React.Component {
       return cube;
     }
 
-    function createCubeGroup (width, height, depth, R, opacity, x, y, z, color) {
-      let cubeGeometry = new THREE.BoxBufferGeometry(width, height, depth);
+    function createCylinder(radius, height, opacity, x, y, z, color) {
+      let material = new THREE.MeshToonMaterial({ color: color, opacity: opacity, transparent: true, wireframe: true});
+      let geometry = new THREE.CylinderBufferGeometry(radius, radius, height, 300, 300, true);
+      let geometry2 = new THREE.CylinderBufferGeometry(radius-30, radius-30, height, 300, 300, true);
+      let cylinder = new THREE.Mesh(geometry, material);
+      cylinder.add(new THREE.Mesh(geometry2, material))
+      cylinder.position.set(x, y, z);
+      cylinder.rotation.x = - Math.PI / 2
+
+      let torus = new THREE.Mesh(new THREE.TorusBufferGeometry(radius, 40, 300, 200), material);
+      torus.position.set(x, y, z+height/2)
+
+      let cylinderTorus = new THREE.Group();
+      cylinderTorus.add(cylinder);
+      cylinderTorus.add(torus)
+      return cylinderTorus;
+    }
+
+    function createNormalCylinder(radius, height, opacity, x, y, z, color ) {
       let material = new THREE.MeshToonMaterial({ color: color, opacity: opacity, transparent: true});
-      let cube = new THREE.Mesh(cubeGeometry, material);
-      cube.position.set(x, y, z);
-
-      let arc = Math.atan(x/y)
-
-      let sliceGeometry = new THREE.BoxBufferGeometry(8, height, depth);
-      let slice = new THREE.Mesh(sliceGeometry, material);
-      let x1, y1;
-      y1 = R * Math.sin(Math.atan(x / y) - 30);
-      x1 = R * Math.cos(Math.atan(x / y) - 30);
-      slice.position.set(x1, y1, z);
-      console.log(x1, y1)
-
-      let sliceGeometry2 = new THREE.BoxBufferGeometry(8, height, depth);
-      let slice2 = new THREE.Mesh(sliceGeometry2, material);
-
-      slice2.position.set(R * Math.atan())
-      
-      cube.rotation.z = - Math.atan(x/y)
-      slice.rotation.z = -Math.atan(slice.position.x / slice.position.y)
-      // slice2.rotation.z = -Math.atan((x+width/2+20)/y)
-
-      let group = new THREE.Group();
-      group.add(cube)
-      group.add(slice)
-      group.add(slice2)
-
-      // group.rotation.z = - Math.atan(x/y);
-      // group.rotation.z = -Math.atan(group.position.x / group.position.y)
-
-      return group;
+      let geometry = new THREE.CylinderBufferGeometry(radius, radius, height, 300, 300);
+      let cylinder = new THREE.Mesh(geometry, material);
+      cylinder.position.set(x, y, z);
+      cylinder.rotation.x = - Math.PI / 2
+      return cylinder
     }
 
     //@param: 半径， 圆心x位置，圆心y位置，切割数量
@@ -269,6 +420,9 @@ export default class Machine extends React.Component {
       gear.rotation.z -= Math.PI / 2 * 0.01;
       transparentCircleGroup.rotation.z += Math.PI / 2 * 0.01;
       specialGroup2.rotation.z -= Math.PI / 2 * 0.01;
+      scatterRing.rotation.z -= Math.PI / 2 * 0.01;
+      core.rotation.z += Math.PI / 2 * 0.01;
+      tailPart.rotation.z += Math.PI / 2 * 0.01;
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
     }
