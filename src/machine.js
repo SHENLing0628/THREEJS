@@ -1,6 +1,7 @@
 import React from  'react';
 import * as THREE from 'three';
 import Orbitcontrols from 'three-orbitcontrols';
+import { CSS3DRenderer, CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer'
 
 export default class Machine extends React.Component {
 
@@ -9,7 +10,7 @@ export default class Machine extends React.Component {
   }
 
   initThree = () => {
-    let camera, scene, renderer, spotLight;
+    let camera, scene, renderer,labelRenderer, spotLight;
     let container = document.getElementById('scene');
 
     let threeBallRotate, 
@@ -29,7 +30,9 @@ export default class Machine extends React.Component {
     torusWithNail,
     core,
     rightTorus,
-    tailPart;
+    tailPart,
+    labelGroup,
+    specialGroup5;
 
     let originalZ = 2000;
 
@@ -157,16 +160,19 @@ export default class Machine extends React.Component {
       sg2_cube = new THREE.Group();
       sg2_leftSlice = new THREE.Group();;
       sg2_rightSlice = new THREE.Group();
+      labelGroup = new THREE.Group();
       getPoint(350, 0, 0, 8).forEach(item => {
         sg2_cube.add(createCube(80, 100, 200, 0.8, item.x, item.y, originalZ - 750, 0x4AFFFE))
         sg2_leftSlice.add(createCube(10, 100, 200, 0.8, item.x, item.y, originalZ - 750, 0x4AFFFE))
         sg2_rightSlice.add(createCube(10, 100, 200, 0.8, item.x, item.y, originalZ - 750, 0x4AFFFE))
+        labelGroup.add(createText('test', item.x, item.y, originalZ - 750))
       })
       sg2_leftSlice.rotateOnAxis(new THREE.Vector3(0,0,750).normalize(), 120);
       sg2_rightSlice.rotateOnAxis(new THREE.Vector3(0,0,750).normalize(), 30);
       specialGroup2.add(sg2_cube);
       specialGroup2.add(sg2_leftSlice);
       specialGroup2.add(sg2_rightSlice);
+      specialGroup2.add(labelGroup);
       scene.add(specialGroup2)
 
       //12. 圆环2
@@ -307,36 +313,53 @@ export default class Machine extends React.Component {
         rightTorus.add(createCube(20, 20, 80, 0.6, item.x, item.y, originalZ - 3000, 0x4AFFFE))
       })
 
-      rightTorus.add(createNormalCylinder(100, 30, 0.9, 0, 0, originalZ - 3200, 0x4AFFFE ))
-      getPoint(150, 0, 0, 10).forEach(item => {
-        rightTorus.add(createCube(30, 30, 150, 0.7, item.x, item.y, originalZ - 3200, 0x4AFFFE))
-      })
+      // rightTorus.add(createNormalCylinder(100, 30, 0.9, 0, 0, originalZ - 3200, 0x4AFFFE ))
+      // getPoint(150, 0, 0, 10).forEach(item => {
+      //   rightTorus.add(createCube(30, 30, 150, 0.7, item.x, item.y, originalZ - 3200, 0x4AFFFE))
+      // })
 
       scene.add(rightTorus)
 
       //收尾带动画部分
       tailPart = new THREE.Group();
-      getPoint(250, 0, 0, 10).forEach(item => {
-        tailPart.add(createCube(20, 20, 200, 0.4, item.x, item.y, originalZ - 3300, 0x4AFFFE))
+      getPoint(350, 0, 0, 8).forEach(item => {
+        tailPart.add(createCube(50, 50, 300, 0.8, item.x, item.y, originalZ - 3200, 0x4AFFFE))
       })
-      getPoint(400, 0, 0, 10).forEach(item => {
-        tailPart.add(createCube(40, 40, 600, 0.8, item.x, item.y, originalZ - 3600, 0x4AFFFE))
+      getPoint(300, 0, 0, 8).forEach(item => {
+        tailPart.add(createNormalCylinder(2, 300, 1, item.x, item.y, originalZ - 3200, 0xF3D225 ))
       })
-      getPoint(330, 0, 0, 10).forEach(item => {
-        tailPart.add(createCube(40, 150, 40, 0.8, item.x, item.y, originalZ - 3880, 0x4AFFFE))
+
+      specialGroup5 = new THREE.Group();
+      getPoint(360, 0, 0, 8).forEach(item => {
+        specialGroup5.add(createTiltObj(2, 1000, 1, item.x, item.y, originalZ - 3800, -1300, 0xF3D225 ))
       })
-      getPoint(200, 0, 0, 100).forEach(item => {
-        tailPart.add(createCube(5, 5, 5, 0.6, item.x, item.y, originalZ - 3600, 0x4AFFFE))
-      })
-      getPoint(500, 0, 0, 100).forEach(item => {
-        tailPart.add(createCube(10, 10, 5, 0.4, item.x, item.y, originalZ - 3050, 0xCC0001))
-      })
-      getPoint(550, 0, 0, 100).forEach(item => {
-        tailPart.add(createCube(10, 10, 5, 0.4, item.x, item.y, originalZ - 3050, 0x4AFFFE))
-      })
-      getPoint(400, 0, 0, 100).forEach(item => {
-        tailPart.add(createCube(5, 30, 5, 0.4, item.x, item.y, originalZ - 2730, 0xFF5500))
-      })
+      // getPoint(300, 0, 0, 8).forEach(item => {
+      //   specialGroup5.add(createNormalCylinder(2, 500, 1, item.x, item.y, originalZ - 3900, 0xF3D225 ))
+      // })
+      console.log(specialGroup5)
+      scene.add(specialGroup5)
+      //原版本尾部
+      // getPoint(250, 0, 0, 10).forEach(item => {
+      //   tailPart.add(createCube(20, 20, 200, 0.4, item.x, item.y, originalZ - 3300, 0x4AFFFE))
+      // })
+      // getPoint(400, 0, 0, 10).forEach(item => {
+      //   tailPart.add(createCube(40, 40, 600, 0.8, item.x, item.y, originalZ - 3600, 0x4AFFFE))
+      // })
+      // getPoint(330, 0, 0, 10).forEach(item => {
+      //   tailPart.add(createCube(40, 150, 40, 0.8, item.x, item.y, originalZ - 3880, 0x4AFFFE))
+      // })
+      // getPoint(200, 0, 0, 100).forEach(item => {
+      //   tailPart.add(createCube(5, 5, 5, 0.6, item.x, item.y, originalZ - 3600, 0x4AFFFE))
+      // })
+      // getPoint(500, 0, 0, 100).forEach(item => {
+      //   tailPart.add(createCube(10, 10, 5, 0.4, item.x, item.y, originalZ - 3050, 0xCC0001))
+      // })
+      // getPoint(550, 0, 0, 100).forEach(item => {
+      //   tailPart.add(createCube(10, 10, 5, 0.4, item.x, item.y, originalZ - 3050, 0x4AFFFE))
+      // })
+      // getPoint(400, 0, 0, 100).forEach(item => {
+      //   tailPart.add(createCube(5, 30, 5, 0.4, item.x, item.y, originalZ - 2730, 0xFF5500))
+      // })
       scene.add(tailPart)
 
       //创建渲染器
@@ -344,6 +367,12 @@ export default class Machine extends React.Component {
 			renderer.setPixelRatio(window.devicePixelRatio); // 设置像素比，针对高清屏
       renderer.setSize( window.innerWidth, window.innerHeight);//渲染器大小尺寸
       container.appendChild( renderer.domElement );
+
+      labelRenderer = new CSS3DRenderer();
+      labelRenderer.setSize(window.innerWidth, window.innerHeight)
+      labelRenderer.domElement.style.position = 'absolute'
+      labelRenderer.domElement.style.top = 10 + 'px'
+      container.appendChild(labelRenderer.domElement)
 
       //动画效果
       animate();
@@ -392,6 +421,23 @@ export default class Machine extends React.Component {
       return cylinderTorus;
     }
 
+    function createTiltObj(radius, height, opacity, x, y, z, targetZ, color ) {
+      let material = new THREE.MeshToonMaterial({ color: color, opacity: opacity, transparent: true});
+      // let geometry = new THREE.CylinderBufferGeometry(radius, radius, height, 300, 300);
+      // let cylinder = new THREE.Mesh(geometry, material);
+      // cylinder.position.set(x, y, z);
+      // // cylinder.rotateOnAxis(new THREE.Vector3(x, y, z).normalize(), 60)
+      // cylinder.rotateX(Math.atan((z - targetZ) / y))
+      // cylinder.rotateY(Math.atan(x / (z - targetZ)) + 90)
+      // return cylinder
+      let geometry = new THREE.BoxBufferGeometry(50, 50, 800);
+      let cube = new THREE.Mesh(geometry, material);
+      cube.position.set(x, y, z);
+      cube.rotateX(Math.atan((z - targetZ) / y))
+      return cube;
+      
+    }
+
     function createNormalCylinder(radius, height, opacity, x, y, z, color ) {
       let material = new THREE.MeshToonMaterial({ color: color, opacity: opacity, transparent: true});
       let geometry = new THREE.CylinderBufferGeometry(radius, radius, height, 300, 300);
@@ -399,6 +445,17 @@ export default class Machine extends React.Component {
       cylinder.position.set(x, y, z);
       cylinder.rotation.x = - Math.PI / 2
       return cylinder
+    }
+
+    function createText(text, x, y, z) {
+      let label = document.createElement('div')
+      label.className = 'label'
+      label.textContent = text
+      let object = new CSS3DObject(label)
+      object.position.set(x, y, z)
+      object.rotation.x = Math.PI / 2
+      object.rotation.z = Math.PI / 2
+      return object
     }
 
     //@param: 半径， 圆心x位置，圆心y位置，切割数量
@@ -423,7 +480,10 @@ export default class Machine extends React.Component {
       scatterRing.rotation.z -= Math.PI / 2 * 0.01;
       core.rotation.z += Math.PI / 2 * 0.01;
       tailPart.rotation.z += Math.PI / 2 * 0.01;
+      // specialGroup5.rotation.z += Math.PI / 2 * 0.01;
+
       renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
       requestAnimationFrame(animate);
     }
 
